@@ -1,5 +1,7 @@
 # Gasífera del Valle S.A. — Plataforma de datos end-to-end en Databricks
 
+**🇪🇸 Español** · [🇬🇧 English](README.en.md)
+
 > **Proyecto de portfolio de ciclo completo**: datos sintéticos reproducibles → Lakehouse medallón → ingesta incremental profesional → ML con validación honesta → BI y analítica conversacional → gobernanza y CI/CD. Todo en Unity Catalog, todo versionado en Git, todo reproducible en cualquier cuenta de Databricks.
 
 ---
@@ -92,16 +94,29 @@ flowchart TB
 ## 📂 Estructura del repositorio
 
 ```text
-├── README.md                          ← estás aquí
+├── README.md                          ← estás aquí (español)
+├── README.en.md                       ← versión en inglés
 ├── docs/
 │   ├── 01-ingenieria-inversa.md       ← reconstrucción técnica completa (auditable)
-│   └── 02-guia-replicacion/           ← prompts guiados para replicar TODO en otra cuenta
+│   ├── 02-guia-replicacion/           ← prompts guiados para replicar TODO en otra cuenta
+│   └── 03-preguntas-entrevista.md     ← 15 preguntas técnicas con respuestas basadas en números reales
+├── .github/workflows/                 ← CI/CD: valida y despliega el bundle con GitHub Actions
 └── gasifera_pipeline_calidad_y_gold/  ← el Declarative Automation Bundle (IaC del pipeline)
     ├── resources/*.pipeline.yml       ← definición del pipeline
     └── src/transformations/           ← SQL: silver (expectativas+DQ) y gold
 ```
 
 Los dashboards (`*.lvdash.json`), notebooks de ML y el generador de datos viven en el bundle/workspace y se documentan íntegramente en [`docs/01-ingenieria-inversa.md`](docs/01-ingenieria-inversa.md).
+
+### 📸 Capturas de los dashboards (opcional, 2 minutos)
+
+Para añadir capturas reales al README: abre cada dashboard en Databricks (pestaña Canvas), toma la captura con la herramienta de tu sistema, guárdalas como `docs/img/dashboard-kpis.png`, `dashboard-finanzas.png`, `dashboard-demanda.png` y `dashboard-ml.png`, y añade al README:
+
+```markdown
+| KPIs AGEPAR | Finanzas |
+| --- | --- |
+| ![KPIs](docs/img/dashboard-kpis.png) | ![Finanzas](docs/img/dashboard-finanzas.png) |
+```
 
 ## 🚀 Replicar el proyecto
 
@@ -118,7 +133,8 @@ Todo el proyecto se puede reconstruir en **cualquier cuenta de Databricks** (inc
 | Forecast | MAPE 2,86 % · MASE 1,20 (validación temporal honesta) |
 | Cumplimiento KPIs AGEPAR | 54,3 % global · CAPEX 102,3 % |
 | Gobernanza | ABAC (máscara PII por tag) + lineage end-to-end |
+| CI/CD | GitHub Actions: `bundle validate` + `bundle deploy` en cada push |
 
 ---
 
-*Construido con: Databricks Free Edition · Unity Catalog · Lakeflow Spark Declarative Pipelines · Auto Loader · Auto CDC · AI/BI Dashboards · Genie · MLflow · Declarative Automation Bundles · GitHub.*
+*Construido con: Databricks Free Edition · Unity Catalog · Lakeflow Spark Declarative Pipelines · Auto Loader · Auto CDC · AI/BI Dashboards · Genie · MLflow · Declarative Automation Bundles · GitHub Actions.*

@@ -1,0 +1,53 @@
+# CI/CD — Despliega el bundle Gasífera a Databricks en cada push a main.
+#
+# Requisito único (una vez): crea el secret del repo en GitHub
+# (Settings → Secrets and variables → Actions → New repository secret):
+#   DATABRICKS_TOKEN = token de acceso personal de Databricks
+#     (User Settings → Developer → Access tokens; recomendado: service
+#      principal con permisos mínimos sobre el catálogo del proyecto)
+# El host de Databricks se lee del secret DATABRICKS_HOST si lo defines,
+# o se puede fijar abajo en la variable WORKSPACE_HOST.
+
+name: Deploy Gasifera bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "gasifera_pipeline_calidad_y_gold/**"
+      - ".github/workflows/databricks-deploy.yml"
+  workflow_dispatch:
+
+env:
+  # Sustituye por tu host real: https://dbc-xxxx.cloud.databricks.com
+  WORKSPACE_HOST: https://REEMPLAZA-TU-HOST.cloud.databricks.com
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate bundle
+        run: databricks bundle validate -t dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST || env.WORKSPACE_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      - name: Deploy bundle (dev)
+        run: databricks bundle deploy -t dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST || env.WORKSPACE_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      # Opcional: validar el pipeline tras el despliegue (dry run = valida
+      # los datasets sin materializar nada). Requiere permisos del pipeline.
+      # - name: Pipeline dry run
+      #   run: |
+      #     PIPELINE_ID=$(databricks bundle summary -t dev --output json | jq -r '.resources.pipelines[]?.id')
+      #     echo "Pipeline: $PIPELINE_ID"
