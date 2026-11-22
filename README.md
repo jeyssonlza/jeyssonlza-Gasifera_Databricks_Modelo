@@ -108,15 +108,15 @@ flowchart TB
 
 Los dashboards (`*.lvdash.json`), notebooks de ML y el generador de datos viven en el bundle/workspace y se documentan íntegramente en [`docs/01-ingenieria-inversa.md`](docs/01-ingenieria-inversa.md).
 
-### 📸 Capturas de los dashboards (opcional, 2 minutos)
+### 📸 Dashboards en acción
 
-Para añadir capturas reales al README: abre cada dashboard en Databricks (pestaña Canvas), toma la captura con la herramienta de tu sistema, guárdalas como `docs/img/dashboard-kpis.png`, `dashboard-finanzas.png`, `dashboard-demanda.png` y `dashboard-ml.png`, y añade al README:
-
-```markdown
 | KPIs AGEPAR | Finanzas |
 | --- | --- |
-| ![KPIs](docs/img/dashboard-kpis.png) | ![Finanzas](docs/img/dashboard-finanzas.png) |
-```
+| ![KPIs AGEPAR](docs/img/dashboard-kpis.png) | ![Finanzas](docs/img/dashboard-finanzas.png) |
+
+| Demanda y Forecast | ML |
+| --- | --- |
+| ![Demanda y Forecast](docs/img/dashboard-demanda.png) | ![ML](docs/img/dashboard-ml.png) |
 
 ## 🚀 Replicar el proyecto
 
