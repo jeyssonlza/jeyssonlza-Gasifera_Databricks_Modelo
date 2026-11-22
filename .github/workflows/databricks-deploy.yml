@@ -19,8 +19,8 @@ on:
   workflow_dispatch:
 
 env:
-  # Sustituye por tu host real: https://dbc-xxxx.cloud.databricks.com
-  WORKSPACE_HOST: https://REEMPLAZA-TU-HOST.cloud.databricks.com
+  # Host real del workspace (la parte del navegador desde https hasta .com)
+  WORKSPACE_HOST: https://dbc-20c6316e-c3c7.cloud.databricks.com
 
 jobs:
   validate-and-deploy:
