@@ -1,0 +1,454 @@
+{
+  "datasets": [
+    {
+      "name": "agepar",
+      "displayName": "KPIs AGEPAR",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gasifera_gold.gold_kpis_agepar_largo",
+        "dimensions": [
+          {
+            "name": "periodo",
+            "expr": "periodo"
+          },
+          {
+            "name": "region",
+            "expr": "region"
+          },
+          {
+            "name": "indicador",
+            "expr": "indicador"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Valor",
+            "expr": "SUM(valor)"
+          },
+          {
+            "name": "Meta",
+            "expr": "SUM(meta)"
+          },
+          {
+            "name": "Cumplimiento",
+            "expr": "AVG(CAST(cumple_meta AS DOUBLE))"
+          }
+        ]
+      }
+    },
+    {
+      "name": "agepar_ultimo",
+      "displayName": "KPIs último mes",
+      "queryLines": [
+        "SELECT periodo, region, indicador, valor, meta, sentido, cumple_meta\n",
+        "FROM (SELECT *, RANK() OVER (ORDER BY periodo DESC) AS rk FROM workspace.gasifera_gold.gold_kpis_agepar_largo)\n",
+        "WHERE rk = 1"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "regulatorio",
+      "displayName": "KPIs Regulatorios AGEPAR",
+      "layout": [
+        {
+          "widget": {
+            "name": "cumplimiento_global",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "agepar",
+                  "fields": [
+                    {
+                      "name": "cumplimiento",
+                      "expression": "MEASURE(`Cumplimiento`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "title": "Cumplimiento global de metas",
+                "showTitle": true
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "cumplimiento",
+                  "displayName": "Cumplimiento",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "cumplimiento_mensual",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "agepar",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "cumplimiento",
+                      "expression": "MEASURE(`Cumplimiento`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "title": "Cumplimiento de metas por mes (%)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "cumplimiento",
+                  "displayName": "Cumplimiento",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "cumplimiento_indicador",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "agepar",
+                  "fields": [
+                    {
+                      "name": "indicador",
+                      "expression": "`indicador`"
+                    },
+                    {
+                      "name": "cumplimiento",
+                      "expression": "MEASURE(`Cumplimiento`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "title": "Cumplimiento por indicador (%)",
+                "showTitle": true
+              },
+              "encodings": {
+                "y": {
+                  "fieldName": "indicador",
+                  "displayName": "Indicador",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 7
+                    },
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "cumplimiento"
+                      }
+                    }
+                  }
+                },
+                "x": {
+                  "fieldName": "cumplimiento",
+                  "displayName": "Cumplimiento",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "saidi_nacional",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "agepar",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "valor",
+                      "expression": "MEASURE(`Valor`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`indicador` IN ('SAIDI (min/mes)')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "title": "SAIDI nacional (min/mes, suma 8 regiones)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "valor",
+                  "displayName": "Minutos",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "cumplimiento_region",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agepar",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "measure(Cumplimiento)",
+                      "expression": "MEASURE(`Cumplimiento`)"
+                    }
+                  ],
+                  "disaggregated": false,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "MEASURE(`Cumplimiento`)"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Cumplimiento por región (%)",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "region",
+                  "displayName": "Región",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 8
+                    },
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "measure(Cumplimiento)"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(Cumplimiento)",
+                  "displayName": "Cumplimiento",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_ultimo_mes",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "agepar_ultimo",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "indicador",
+                      "expression": "`indicador`"
+                    },
+                    {
+                      "name": "valor",
+                      "expression": "`valor`"
+                    },
+                    {
+                      "name": "meta",
+                      "expression": "`meta`"
+                    },
+                    {
+                      "name": "cumple_meta",
+                      "expression": "`cumple_meta`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "title": "KPIs del último mes por región e indicador",
+                "showTitle": true
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "region",
+                    "displayName": "Región"
+                  },
+                  {
+                    "fieldName": "indicador",
+                    "displayName": "Indicador"
+                  },
+                  {
+                    "fieldName": "valor",
+                    "displayName": "Valor"
+                  },
+                  {
+                    "fieldName": "meta",
+                    "displayName": "Meta"
+                  },
+                  {
+                    "fieldName": "cumple_meta",
+                    "displayName": "Cumple"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 12,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "genieSpace": {
+      "overrideId": "01f1e5b43bc714a78ac583be51928a6b",
+      "enablementMode": "ENABLED"
+    }
+  }
+}

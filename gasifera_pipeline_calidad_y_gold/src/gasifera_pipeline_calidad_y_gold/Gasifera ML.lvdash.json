@@ -1,0 +1,459 @@
+{
+  "datasets": [
+    {
+      "name": "churn_metricas",
+      "displayName": "Métricas churn",
+      "queryLines": [
+        "SELECT modelo, auc_roc, auc_pr, precision_05, recall_05, lift_top_decil\n",
+        "FROM workspace.gasifera.ml_churn_metricas"
+      ]
+    },
+    {
+      "name": "importancias",
+      "displayName": "Importancias RF",
+      "queryLines": [
+        "SELECT feature, importancia\n",
+        "FROM workspace.gasifera.ml_churn_importancias"
+      ]
+    },
+    {
+      "name": "riesgo",
+      "displayName": "Top-20 en riesgo",
+      "queryLines": [
+        "SELECT cliente_id, tipo_cliente, region, prob_baja\n",
+        "FROM workspace.gasifera.ml_clientes_riesgo"
+      ]
+    },
+    {
+      "name": "validacion",
+      "displayName": "Validación forecast",
+      "queryLines": [
+        "SELECT periodo, 'real' AS serie, real_m3 AS valor FROM workspace.gasifera.ml_forecast_validacion\n",
+        "UNION ALL\n",
+        "SELECT periodo, 'naive estacional' AS serie, pred_naive_m3 FROM workspace.gasifera.ml_forecast_validacion\n",
+        "UNION ALL\n",
+        "SELECT periodo, 'regresión' AS serie, pred_regresion_m3 FROM workspace.gasifera.ml_forecast_validacion"
+      ]
+    },
+    {
+      "name": "fmetricas",
+      "displayName": "Métricas forecast",
+      "queryLines": [
+        "SELECT modelo, mape_pct, mae_m3, mase\n",
+        "FROM workspace.gasifera.ml_forecast_metricas"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "ml",
+      "displayName": "ML: Churn y Forecast",
+      "layout": [
+        {
+          "widget": {
+            "name": "auc_pr_mejor",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "churn_metricas",
+                  "fields": [
+                    {
+                      "name": "auc_pr",
+                      "expression": "AVG(`auc_pr`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`modelo` IN ('Random Forest')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "title": "AUC-PR Random Forest (baseline aleatorio = 0,055)",
+                "showTitle": true
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "auc_pr",
+                  "displayName": "AUC-PR",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 3
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "auc_pr_modelos",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "churn_metricas",
+                  "fields": [
+                    {
+                      "name": "modelo",
+                      "expression": "`modelo`"
+                    },
+                    {
+                      "name": "auc_pr",
+                      "expression": "SUM(`auc_pr`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "title": "AUC-PR por modelo vs baseline",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "modelo",
+                  "displayName": "Modelo",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 3
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "auc_pr",
+                  "displayName": "AUC-PR",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "validacion_forecast",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "validacion",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "vol_M",
+                      "expression": "SUM(`valor`) / 1000000"
+                    },
+                    {
+                      "name": "serie",
+                      "expression": "`serie`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "title": "Validación jul-nov 2026: real vs naive vs regresión (Mm³)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "vol_M",
+                  "displayName": "Volumen (Mm³)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "serie",
+                  "displayName": "Serie",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "real",
+                        "color": "#2272B4"
+                      },
+                      {
+                        "value": "naive estacional",
+                        "color": "#3A9D5D"
+                      },
+                      {
+                        "value": "regresión",
+                        "color": "#C0392B"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 7,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "importancias_rf",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "importancias",
+                  "fields": [
+                    {
+                      "name": "feature",
+                      "expression": "`feature`"
+                    },
+                    {
+                      "name": "imp",
+                      "expression": "SUM(`importancia`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "title": "Importancia de variables (Random Forest)",
+                "showTitle": true
+              },
+              "encodings": {
+                "y": {
+                  "fieldName": "feature",
+                  "displayName": "Variable",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 12
+                    },
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "imp"
+                      }
+                    }
+                  }
+                },
+                "x": {
+                  "fieldName": "imp",
+                  "displayName": "Importancia",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "mape_modelos",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "fmetricas",
+                  "fields": [
+                    {
+                      "name": "modelo",
+                      "expression": "`modelo`"
+                    },
+                    {
+                      "name": "mape",
+                      "expression": "SUM(`mape_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "title": "MAPE validación forecast (%) — menor es mejor",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "modelo",
+                  "displayName": "Modelo",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 2
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "mape",
+                  "displayName": "MAPE (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "top20_riesgo",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "riesgo",
+                  "fields": [
+                    {
+                      "name": "cliente_id",
+                      "expression": "`cliente_id`"
+                    },
+                    {
+                      "name": "tipo_cliente",
+                      "expression": "`tipo_cliente`"
+                    },
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "prob_baja",
+                      "expression": "`prob_baja`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "title": "Top-20 clientes activos con mayor prob. de baja (demo del framework)",
+                "showTitle": true
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "cliente_id",
+                    "displayName": "Cliente"
+                  },
+                  {
+                    "fieldName": "tipo_cliente",
+                    "displayName": "Tipo"
+                  },
+                  {
+                    "fieldName": "region",
+                    "displayName": "Región"
+                  },
+                  {
+                    "fieldName": "prob_baja",
+                    "displayName": "Prob. baja"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "genieSpace": {
+      "overrideId": "01f1e5b43bc714a78ac583be51928a6b",
+      "enablementMode": "ENABLED"
+    }
+  }
+}
