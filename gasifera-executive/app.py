@@ -151,7 +151,8 @@ def genie_ask(pregunta: str, timeout_s: int = 90):
             break
         time.sleep(2)
     if message.get("status") != "COMPLETED":
-        raise RuntimeError(f"Genie no completó la respuesta (status: {message.get('status')})")
+        detalle = message.get("error") or message.get("status")
+        raise RuntimeError(f"Genie no completó la respuesta: {detalle}")
     respuesta, sql, sugerencias = None, None, []
     for att in message.get("attachments", []):
         text_att = att.get("text")
