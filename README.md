@@ -101,6 +101,7 @@ flowchart TB
 │   ├── 02-guia-replicacion/           ← prompts guiados para replicar TODO en otra cuenta
 │   └── 03-preguntas-entrevista.md     ← 15 preguntas técnicas con respuestas basadas en números reales
 ├── .github/workflows/                 ← CI/CD: valida y despliega el bundle con GitHub Actions
+├── gasifera-executive/                ← código de la app (Databricks Apps, panel ejecutivo)
 └── gasifera_pipeline_calidad_y_gold/  ← el Declarative Automation Bundle (IaC del pipeline)
     ├── resources/*.pipeline.yml       ← definición del pipeline
     └── src/transformations/           ← SQL: silver (expectativas+DQ) y gold
@@ -134,7 +135,8 @@ Todo el proyecto se puede reconstruir en **cualquier cuenta de Databricks** (inc
 | Cumplimiento KPIs AGEPAR | 54,3 % global · CAPEX 102,3 % |
 | Gobernanza | ABAC (máscara PII por tag) + lineage end-to-end |
 | CI/CD | GitHub Actions: `bundle validate` + `bundle deploy` en cada push |
+| App productiva | [Gasifera Executive](https://gasifera-executive-2829882457547295.aws.databricksapps.com) — panel ejecutivo en vivo sobre el lakehouse |
 
 ---
 
-*Construido con: Databricks Free Edition · Unity Catalog · Lakeflow Spark Declarative Pipelines · Auto Loader · Auto CDC · AI/BI Dashboards · Genie · MLflow · Declarative Automation Bundles · GitHub Actions.*
+*Construido con: Databricks Free Edition · Unity Catalog · Lakeflow Spark Declarative Pipelines · Auto Loader · Auto CDC · AI/BI Dashboards · Genie · MLflow · Databricks Apps · Declarative Automation Bundles · GitHub Actions.*
