@@ -1,0 +1,541 @@
+{
+  "datasets": [
+    {
+      "name": "gastos",
+      "displayName": "Gastos CAPEX/OPEX",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gasifera_gold.gold_finanzas_mensual",
+        "dimensions": [
+          {
+            "name": "periodo",
+            "expr": "periodo"
+          },
+          {
+            "name": "tipo_gasto",
+            "expr": "tipo_gasto"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Plan USD",
+            "expr": "SUM(plan_usd)"
+          },
+          {
+            "name": "Real USD",
+            "expr": "SUM(real_usd)"
+          },
+          {
+            "name": "Ejecucion",
+            "expr": "MEASURE(`Real USD`) / MEASURE(`Plan USD`)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ingresos",
+      "displayName": "Ingresos por consumo",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gasifera_gold.gold_consumo_mensual",
+        "dimensions": [
+          {
+            "name": "periodo",
+            "expr": "periodo"
+          },
+          {
+            "name": "region",
+            "expr": "region"
+          },
+          {
+            "name": "tipo_cliente",
+            "expr": "tipo_cliente"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Facturacion USD",
+            "expr": "SUM(facturacion_usd)"
+          },
+          {
+            "name": "Impago pct",
+            "expr": "AVG(pct_impago)"
+          },
+          {
+            "name": "Clientes",
+            "expr": "SUM(clientes)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "gastos_ultimo",
+      "displayName": "Gastos último mes",
+      "queryLines": [
+        "SELECT periodo, tipo_gasto, plan_usd, real_usd, desvio_pct\n",
+        "FROM (SELECT *, RANK() OVER (ORDER BY periodo DESC) AS rk FROM workspace.gasifera_gold.gold_finanzas_mensual)\n",
+        "WHERE rk = 1"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "finanzas",
+      "displayName": "Finanzas",
+      "layout": [
+        {
+          "widget": {
+            "name": "ejecucion_capex",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "gastos",
+                  "fields": [
+                    {
+                      "name": "ejecucion",
+                      "expression": "MEASURE(`Ejecucion`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`tipo_gasto` IN ('capex')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "title": "Ejecución CAPEX (real/plan, acumulado)",
+                "showTitle": true
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "ejecucion",
+                  "displayName": "Ejecución",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "facturacion_total",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "ingresos",
+                  "fields": [
+                    {
+                      "name": "fact_M",
+                      "expression": "MEASURE(`Facturacion USD`) / 1000000"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "title": "Facturación acumulada 35 meses (M USD)",
+                "showTitle": true
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "fact_M",
+                  "displayName": "M USD",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "plan_vs_real",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "gastos",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "plan_M",
+                      "expression": "MEASURE(`Plan USD`) / 1000000"
+                    },
+                    {
+                      "name": "real_M",
+                      "expression": "MEASURE(`Real USD`) / 1000000"
+                    },
+                    {
+                      "name": "tipo_gasto",
+                      "expression": "`tipo_gasto`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "title": "Plan vs real por tipo de gasto (M USD)",
+                "showTitle": true
+              },
+              "encodings": {
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "plan_M",
+                      "displayName": "Plan (M USD)"
+                    },
+                    {
+                      "fieldName": "real_M",
+                      "displayName": "Real (M USD)"
+                    }
+                  ],
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                }
+              },
+              "facet": {
+                "type": "wrap",
+                "fieldName": "tipo_gasto",
+                "scale": {
+                  "type": "categorical"
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "facturacion_mensual",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "ingresos",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "fact_M",
+                      "expression": "MEASURE(`Facturacion USD`) / 1000000"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "title": "Facturación mensual (M USD)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "fact_M",
+                  "displayName": "M USD",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "facturacion_region",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "ingresos",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "fact_M",
+                      "expression": "MEASURE(`Facturacion USD`) / 1000000"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "title": "Facturación acumulada por región (M USD)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "region",
+                  "displayName": "Región",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 8
+                    },
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "fact_M"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "fact_M",
+                  "displayName": "M USD",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "impago_promedio",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "ingresos",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "impago",
+                      "expression": "MEASURE(`Impago pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "frame": {
+                "title": "Impago promedio por mes (%)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "impago",
+                  "displayName": "Impago (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "gastos_ultimo_tabla",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "gastos_ultimo",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "tipo_gasto",
+                      "expression": "`tipo_gasto`"
+                    },
+                    {
+                      "name": "plan_usd",
+                      "expression": "`plan_usd`"
+                    },
+                    {
+                      "name": "real_usd",
+                      "expression": "`real_usd`"
+                    },
+                    {
+                      "name": "desvio_pct",
+                      "expression": "`desvio_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "title": "Gastos del último mes (CAPEX/OPEX)",
+                "showTitle": true
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "periodo",
+                    "displayName": "Mes"
+                  },
+                  {
+                    "fieldName": "tipo_gasto",
+                    "displayName": "Tipo"
+                  },
+                  {
+                    "fieldName": "plan_usd",
+                    "displayName": "Plan (USD)"
+                  },
+                  {
+                    "fieldName": "real_usd",
+                    "displayName": "Real (USD)"
+                  },
+                  {
+                    "fieldName": "desvio_pct",
+                    "displayName": "Desvío (%)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 12,
+            "height": 4
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "genieSpace": {
+      "overrideId": "01f1e5b43bc714a78ac583be51928a6b",
+      "enablementMode": "ENABLED"
+    }
+  }
+}

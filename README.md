@@ -101,13 +101,14 @@ flowchart TB
 │   ├── 02-guia-replicacion/           ← prompts guiados para replicar TODO en otra cuenta
 │   └── 03-preguntas-entrevista.md     ← 15 preguntas técnicas con respuestas basadas en números reales
 ├── .github/workflows/                 ← CI/CD: valida y despliega el bundle con GitHub Actions
+├── dashboards/                        ← los 4 AI/BI dashboards (.lvdash.json) importables
 ├── gasifera-executive/                ← código de la app (Databricks Apps, panel ejecutivo)
 └── gasifera_pipeline_calidad_y_gold/  ← el Declarative Automation Bundle (IaC del pipeline)
     ├── resources/*.pipeline.yml       ← definición del pipeline
     └── src/transformations/           ← SQL: silver (expectativas+DQ) y gold
 ```
 
-Los dashboards (`*.lvdash.json`), notebooks de ML y el generador de datos viven en el bundle/workspace y se documentan íntegramente en [`docs/01-ingenieria-inversa.md`](docs/01-ingenieria-inversa.md).
+Los dashboards están versionados en [`dashboards/`](dashboards/) (archivos `.lvdash.json` importables desde **Dashboards → Create → Import dashboard JSON**) y se documentan íntegramente en [`docs/01-ingenieria-inversa.md`](docs/01-ingenieria-inversa.md).
 
 ### 📸 Dashboards en acción
 

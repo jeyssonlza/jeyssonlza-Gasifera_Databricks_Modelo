@@ -1,0 +1,340 @@
+{
+  "datasets": [
+    {
+      "name": "demanda_union",
+      "displayName": "Demanda real y proyección",
+      "queryLines": [
+        "SELECT periodo, 'TOTAL' AS region, SUM(volumen_m3) AS valor, 'real' AS tipo\n",
+        "FROM workspace.gasifera_gold.gold_consumo_mensual\n",
+        "GROUP BY periodo\n",
+        "UNION ALL\n",
+        "SELECT periodo, region, prediccion_m3 AS valor, 'proyeccion' AS tipo\n",
+        "FROM workspace.gasifera.ml_forecast_demanda"
+      ]
+    },
+    {
+      "name": "forecast",
+      "displayName": "Proyección de demanda",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gasifera.ml_forecast_demanda",
+        "dimensions": [
+          {
+            "name": "periodo",
+            "expr": "periodo"
+          },
+          {
+            "name": "region",
+            "expr": "region"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Prediccion m3",
+            "expr": "SUM(prediccion_m3)"
+          },
+          {
+            "name": "Referencia 12m m3",
+            "expr": "SUM(referencia_12m_m3)"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "demanda",
+      "displayName": "Demanda y Forecast",
+      "layout": [
+        {
+          "widget": {
+            "name": "total_proyectado",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "forecast",
+                  "fields": [
+                    {
+                      "name": "total_Mm3",
+                      "expression": "MEASURE(`Prediccion m3`) / 1000000"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`region` IN ('TOTAL')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "frame": {
+                "title": "Demanda proyectada 6 meses (Mm³)",
+                "showTitle": true
+              },
+              "encodings": {
+                "value": {
+                  "fieldName": "total_Mm3",
+                  "displayName": "Mm³",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "demanda_real_proyeccion",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "demanda_union",
+                  "fields": [
+                    {
+                      "name": "tipo",
+                      "expression": "`tipo`"
+                    },
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "sum(valor)",
+                      "expression": "SUM(`valor`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`region` IN ('TOTAL')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Demanda mensual total: real y proyección (m³)",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "periodo",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(valor)",
+                  "displayName": "Volumen (m³)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "tipo",
+                  "displayName": "Tipo",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "real",
+                        "color": "#2272B4"
+                      },
+                      {
+                        "value": "proyeccion",
+                        "color": "#C0392B"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "proyeccion_por_region",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "forecast",
+                  "fields": [
+                    {
+                      "name": "region",
+                      "expression": "`region`"
+                    },
+                    {
+                      "name": "pred_Mm3",
+                      "expression": "MEASURE(`Prediccion m3`) / 1000000"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`region` <> 'TOTAL'"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "frame": {
+                "title": "Proyección 6 meses por región (Mm³)",
+                "showTitle": true
+              },
+              "encodings": {
+                "x": {
+                  "fieldName": "region",
+                  "displayName": "Región",
+                  "scale": {
+                    "type": "categorical",
+                    "categorySize": {
+                      "type": "number-of-categories",
+                      "number": 8
+                    },
+                    "sort": {
+                      "by": "measure-reversed",
+                      "measure": {
+                        "fieldName": "pred_Mm3"
+                      }
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "pred_Mm3",
+                  "displayName": "Volumen (Mm³)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "tabla_proyeccion",
+            "queries": [
+              {
+                "name": "main",
+                "query": {
+                  "datasetName": "forecast",
+                  "fields": [
+                    {
+                      "name": "periodo",
+                      "expression": "`periodo`"
+                    },
+                    {
+                      "name": "prediccion",
+                      "expression": "MEASURE(`Prediccion m3`) / 1000000"
+                    },
+                    {
+                      "name": "referencia",
+                      "expression": "MEASURE(`Referencia 12m m3`) / 1000000"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`region` IN ('TOTAL')"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "frame": {
+                "title": "Proyección mensual total (Mm³) vs mismo mes año anterior",
+                "showTitle": true
+              },
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "periodo",
+                    "displayName": "Mes"
+                  },
+                  {
+                    "fieldName": "prediccion",
+                    "displayName": "Proyección (Mm³)"
+                  },
+                  {
+                    "fieldName": "referencia",
+                    "displayName": "Mismo mes año anterior (Mm³)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 12,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "genieSpace": {
+      "overrideId": "01f1e5b43bc714a78ac583be51928a6b",
+      "enablementMode": "ENABLED"
+    }
+  }
+}
