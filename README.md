@@ -1,6 +1,6 @@
 # Gasífera del Valle S.A. — Plataforma de datos end-to-end en Databricks
 
-**🇪🇸 Español** · [🇬🇧 English](README.en.md)
+**🇪🇸 Español** · [🇬🇧 English](README.en.md) · [🇧🇷 Português](README.pt.md)
 
 > **Proyecto de portfolio de ciclo completo**: datos sintéticos reproducibles → Lakehouse medallón → ingesta incremental profesional → ML con validación honesta → BI y analítica conversacional → gobernanza y CI/CD. Todo en Unity Catalog, todo versionado en Git, todo reproducible en cualquier cuenta de Databricks.
 
