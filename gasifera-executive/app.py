@@ -11,6 +11,7 @@ deterministas, pipeline medallón con Lakeflow Spark Declarative Pipelines.
 
 import json
 import os
+import time
 
 import pandas as pd
 import streamlit as st
@@ -126,6 +127,44 @@ def clientes_riesgo() -> pd.DataFrame:
                      FROM {BASE}.ml_clientes_riesgo ORDER BY prob_baja DESC LIMIT 20""")
 
 
+# ---------------------------------------------------------------- Genie
+GENIE_SPACE_ID = os.environ.get("GENIE_SPACE_ID", "01f1e5b43bc714a78ac583be51928a6b")
+
+
+def genie_ask(pregunta: str, timeout_s: int = 90):
+    """Envía la pregunta al agente Genie y devuelve (respuesta, sql, sugerencias)."""
+    w = get_client()
+    resp = w.api_client.do(
+        "POST",
+        f"/api/2.0/genie/spaces/{GENIE_SPACE_ID}/start-conversation",
+        body={"content": pregunta},
+    )
+    conv, msg = resp["conversation_id"], resp["message_id"]
+    deadline = time.time() + timeout_s
+    message = {}
+    while time.time() < deadline:
+        message = w.api_client.do(
+            "GET",
+            f"/api/2.0/genie/spaces/{GENIE_SPACE_ID}/conversations/{conv}/messages/{msg}",
+        )
+        if message.get("status") in ("COMPLETED", "FAILED", "CANCELLED"):
+            break
+        time.sleep(2)
+    if message.get("status") != "COMPLETED":
+        raise RuntimeError(f"Genie no completó la respuesta (status: {message.get('status')})")
+    respuesta, sql, sugerencias = None, None, []
+    for att in message.get("attachments", []):
+        text_att = att.get("text")
+        if text_att and text_att.get("purpose") == "TEXT_ATTACHMENT_PURPOSE_ANSWER":
+            respuesta = text_att.get("content")
+        q = att.get("query") or {}
+        if q.get("query") and sql is None:
+            sql = q["query"]
+        sq = att.get("suggested_questions") or {}
+        sugerencias.extend(sq.get("questions", []))
+    return respuesta, sql, sugerencias
+
+
 # ---------------------------------------------------------------- UI
 st.title("🔥 Gasifera Executive")
 st.caption(
@@ -163,6 +202,40 @@ try:
     st.subheader("Top-20 clientes con mayor probabilidad de baja")
     st.caption("Demostración del framework de churn (los datos sintéticos no contienen señal; ver métricas en el dashboard ML)")
     st.dataframe(clientes_riesgo(), use_container_width=True, hide_index=True)
+
+    # ---------------------------------------------------- Genie: chat con los datos
+    st.divider()
+    st.subheader("💬 Pregunta a tus datos (Genie)")
+    st.caption(
+        "Agente Genie **«Gasifera Analista de Negocio»** sobre las tablas gold y ML, "
+        "con contexto curado: genera el SQL, lo ejecuta y responde en español."
+    )
+    if "chat" not in st.session_state:
+        st.session_state.chat = []
+    for role, content, sql in st.session_state.chat:
+        with st.chat_message(role):
+            st.markdown(content)
+            if sql:
+                with st.expander("SQL generado"):
+                    st.code(sql, language="sql")
+
+    pregunta = st.chat_input("Ej.: ¿Cuál es la facturación por región este año?")
+    if pregunta:
+        st.session_state.chat.append(("user", pregunta, None))
+        with st.chat_message("user"):
+            st.markdown(pregunta)
+        with st.chat_message("assistant"):
+            with st.spinner("Genie está consultando el lakehouse…"):
+                try:
+                    respuesta, sql, _ = genie_ask(pregunta)
+                except Exception as e:
+                    respuesta, sql = f"⚠️ No pude completar la consulta: {e}", None
+            st.markdown(respuesta or "_Sin respuesta_")
+            if sql:
+                with st.expander("SQL generado"):
+                    st.code(sql, language="sql")
+        st.session_state.chat.append(("assistant", respuesta or "_Sin respuesta_", sql))
+        st.rerun()
 
     st.divider()
     st.caption(
