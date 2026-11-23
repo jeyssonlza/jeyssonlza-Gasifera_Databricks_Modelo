@@ -6,7 +6,7 @@ Documento técnico que reconstruye, pieza por pieza, cómo está construido el p
 
 ## 1. Contexto de negocio simulado
 
-**Gasífera del Valle S.A.** es una empresa ficticia de distribución de gas natural regulada por la **AGEPAR** (Agencia de Promoción y Control del Acceso a los Servicios de Gas, también ficticia). El caso cubre 8 regiones geográficas, 40 estaciones de regulación y medición (AGEPAR exige reportar SAIDI, SAIFI, fugas por 100 km, PCI del gas, % de ejecución CAPEX y reclamos por cada 1.000 clientes).
+**Gasífera del Valle S.A.** es una empresa ficticia de distribución de gas natural regulada por la **AGEPAR** (regulador real; se usan sus reglas de negocio públicas como referencia, mientras que la empresa y los datos son ficticios). El caso cubre 8 regiones geográficas, 40 estaciones de regulación y medición (AGEPAR exige reportar SAIDI, SAIFI, fugas por 100 km, PCI del gas, % de ejecución CAPEX y reclamos por cada 1.000 clientes).
 
 Los datos son **100% sintéticos y deterministas** (semilla fija), generados con PySpark: cualquiera que replique el proyecto obtiene exactamente los mismos números.
 

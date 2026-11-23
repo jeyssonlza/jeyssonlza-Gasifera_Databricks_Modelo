@@ -4,6 +4,8 @@
 
 > **A complete portfolio project**: reproducible synthetic data → medallion Lakehouse → professional incremental ingestion → honest ML → BI and conversational analytics → governance and CI/CD. All on Unity Catalog, all versioned in Git, all reproducible in any Databricks account.
 
+> **Note on AGEPAR and the data.** This is a study and practice project built around a fictional company (Gasífera del Valle S.A.) and 100% synthetic data. The regulatory indicators (SAIDI, SAIFI, leaks per 100 km, gas quality, CAPEX execution, complaints per 1,000 customers) follow the public business rules of the regulator **AGEPAR**. No data or document comes from real companies. It was built on Databricks Free Edition so anyone can replicate it step by step. License: [MIT](LICENSE).
+
 ## What is this?
 
 A **complete data platform for a regulated natural gas distributor** (fictional), built entirely on Databricks to demonstrate mastery of the three data areas:

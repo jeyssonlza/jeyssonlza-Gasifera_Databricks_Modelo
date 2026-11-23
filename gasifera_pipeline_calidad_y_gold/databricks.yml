@@ -19,9 +19,7 @@ targets:
     mode: production
     workspace:
       host: https://dbc-20c6316e-c3c7.cloud.databricks.com
-      # We always use /Users/jlzarmas@gmail.com for all resources to make sure we only have a single copy.
-      root_path: /Users/jlzarmas@gmail.com/.bundle/${bundle.name}/${bundle.target}
-    run_as:
-      # This runs as jlzarmas@gmail.com in production. We could also use a service principal here,
-      # see https://docs.databricks.com/dev-tools/bundles/permissions.html.
-      user_name: jlzarmas@gmail.com
+      # We always use the current user's folder for all resources to make sure we only have a single copy.
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    # In production the bundle runs as the deploying identity. You could also use a service principal here,
+    # see https://docs.databricks.com/dev-tools/bundles/permissions.html.

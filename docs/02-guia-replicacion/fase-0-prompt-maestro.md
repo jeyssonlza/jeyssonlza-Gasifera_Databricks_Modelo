@@ -10,7 +10,7 @@ Databricks. Léelo entero antes de actuar, y respétalo en TODAS las fases.
 
 ## CONTEXTO DE NEGOCIO
 Gasífera del Valle S.A.: distribuidora de gas natural regulada por la AGEPAR
-(agencia regulatoria ficticia). 8 regiones, 40 estaciones de regulación y
+(regulador real cuyas reglas públicas se usan como referencia; la empresa y los datos son ficticios). 8 regiones, 40 estaciones de regulación y
 medición, 18.000 clientes. La AGEPAR exige reportar: SAIDI, SAIFI, fugas por
 100 km de red, reclamos por 1.000 clientes, PCI del gas y % de ejecución CAPEX.
 La dirección necesita: cumplimiento regulatorio, control financiero

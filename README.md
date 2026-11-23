@@ -6,9 +6,11 @@
 
 ---
 
+> **Nota sobre AGEPAR y los datos.** Este proyecto es un ejercicio de estudio y práctica con una empresa ficticia (Gasífera del Valle S.A.) y datos 100 % sintéticos. Los indicadores regulatorios (SAIDI, SAIFI, fugas por 100 km, calidad del gas, ejecución de CAPEX, reclamos por cada 1.000 clientes) siguen las reglas de negocio públicas del regulador **AGEPAR**. Ningún dato ni documento proviene de empresas reales. Se construyó en Databricks Free Edition para que cualquiera pueda replicarlo paso a paso. Licencia: [MIT](LICENSE).
+
 ## ¿Qué es esto?
 
-Una **plataforma de datos completa para una distribuidora de gas natural regulada** (ficticia), construida íntegramente en Databricks como demostración de dominio de las tres áreas de datos:
+Una **plataforma de datos completa para una distribuidora de gas natural regulada** (empresa y datos ficticios), construida íntegramente en Databricks como demostración de dominio de las tres áreas de datos:
 
 | Área | Qué demuestra | Evidencia medible |
 | --- | --- | --- |

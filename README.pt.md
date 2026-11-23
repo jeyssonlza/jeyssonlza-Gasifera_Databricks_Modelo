@@ -4,9 +4,11 @@
 
 > **Projeto de portfólio de ciclo completo**: dados sintéticos reproduzíveis → Lakehouse medalhão → ingestão incremental profissional → ML com validação honesta → BI e analítica conversacional → governança e CI/CD. Tudo em Unity Catalog, tudo versionado em Git, tudo reproduzível em qualquer conta Databricks.
 
+> **Nota sobre a AGEPAR e os dados.** Este projeto é um exercício de estudo e prática com uma empresa fictícia (Gasífera del Valle S.A.) e dados 100% sintéticos. Os indicadores regulatórios (SAIDI, SAIFI, vazamentos por 100 km, qualidade do gás, execução de CAPEX, reclamações por 1.000 clientes) seguem as regras de negócio públicas do regulador **AGEPAR**. Nenhum dado ou documento vem de empresas reais. Foi construído no Databricks Free Edition para que qualquer pessoa possa replicá-lo passo a passo. Licença: [MIT](LICENSE).
+
 ## O que é isto?
 
-Uma **plataforma de dados completa para uma distribuidora de gás natural regulada** (fictícia), construída integralmente em Databricks para demonstrar domínio das três áreas de dados:
+Uma **plataforma de dados completa para uma distribuidora de gás natural regulada** (empresa e dados fictícios), construída integralmente em Databricks para demonstrar domínio das três áreas de dados:
 
 | Área | O que demonstra | Evidência mensurável |
 | --- | --- | --- |
